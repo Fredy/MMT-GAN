@@ -86,20 +86,20 @@ def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
             gan_loss = gan.train_on_batch(image_batch_train,
                                           [image_batch_label, gan_target])
 
-        print(f'discriminator_loss : {discriminator_loss:.5}')
-        print(f'gan_loss : {gan_loss:.5}')
+        print(f'discriminator_loss : {discriminator_loss}')
+        print(f'gan_loss : {gan_loss}')
         gan_loss = str(gan_loss)
 
         with open(model_save_dir + 'losses.txt', 'a') as loss_file:
             loss_file.write(
-                f'epoch {e} : gan_loss = {gan_loss:.6} ; '
-                f'discriminator_loss = {discriminator_loss:.6}\n'
+                f'epoch {e} : gan_loss = {gan_loss} ; '
+                f'discriminator_loss = {discriminator_loss}\n'
             )
 
         if e == 1 or e % 5 == 0:
             utils.plot_example_images(
                 output_dir, e, generator, label_imgs, train_imgs,
                 img_loader.imgs_count)
-        if e % 500 == 0:
+        if e % 10 == 0:
             generator.save(model_save_dir + f'gen_model_{e}.h5')
             discriminator.save(model_save_dir + f'dis_model_{e}.h5')
