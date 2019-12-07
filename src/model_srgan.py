@@ -1,13 +1,6 @@
 from tensorflow.keras.layers import (
-    Input,
-    Conv2D,
-    ReLU,
-    BatchNormalization,
-    Dense,
-    Add,
-    Conv2DTranspose,
-    LeakyReLU,
-    Flatten,
+    Add, BatchNormalization, Conv2D, Conv2DTranspose, Dense, Flatten, Input,
+    LeakyReLU, PReLU,
 )
 from tensorflow.keras.models import Model
 
@@ -15,35 +8,34 @@ from tensorflow.keras.models import Model
 def get_generator(input_shape):
     in_layer = Input(input_shape)
     net = Conv2D(
-        filters=64, kernel_size=9, strides=1, padding='same', activation='relu'
-    )(in_layer)
+        filters=64, kernel_size=9, strides=1, padding='same')(in_layer)
+    net = PReLU(shared_axes=[1, 2])(net)
+
+    pre_res_block = net
 
     # ======= N residual blocks (N = 16)========
-    for i in range(16):
-        # filters, kernel_size, strides, padding
+    for _ in range(16):
         block = Conv2D(64, 3, 1, 'same')(net)
         block = BatchNormalization()(block)
-        block = ReLU()(block)
+        block = PReLU(shared_axes=[1, 2])(block)
         block = Conv2D(64, 3, 1, 'same')(block)
-        block = BatchNormalization()(block)
-        block = Add()([net, block])
-        net = block
+        block = BatchNormalization(momentum=0.5)(block)
+        net = Add()([net, block])
     # ======= N residual blocks ========
-    # stride = 1, to maintain the image size
-    net = Conv2DTranspose(64, 3, 1, 'same', activation='relu')(net)
-    net = Conv2DTranspose(3, 1, 1, 'same', activation='tanh')(net)
 
-    generator = Model(inputs=in_layer, outputs=net, name='Generator')
+    # Post residual blocks
+    net = Conv2D(64, 3, 1, 'same')(net)
+    net = BatchNormalization()(net)
+    net = Add()([net, pre_res_block])
 
-    return generator
+    # Upscale
+    # TODO: add activation = relu
+    net = Conv2DTranspose(256, 3, 1, 'same')(net)
+    net = Conv2DTranspose(256, 3, 1, 'same')(net)
 
+    net = Conv2D(3, 9, 1, 'same', activation='tanh')(net)
 
-def _discriminator_block(model, filters, kernel_size, strides):
-    tmp = Conv2D(filters, kernel_size, strides, 'same')(model)
-    tmp = BatchNormalization()(tmp)
-    tmp = LeakyReLU(alpha=0.2)(tmp)
-
-    return tmp
+    return Model(inputs=in_layer, outputs=net, name='Generator')
 
 
 def get_discriminator(input_shape):
@@ -64,8 +56,14 @@ def get_discriminator(input_shape):
     net = Dense(1024)(net)
     net = LeakyReLU(alpha=0.2)(net)
 
-    net = Dense(35, activation='sigmoid')(net)
+    net = Dense(1, activation='sigmoid')(net)
 
-    discriminator = Model(inputs=in_layer, outputs=net)
+    return Model(inputs=in_layer, outputs=net)
 
-    return discriminator
+
+def _discriminator_block(model, filters, kernel_size, strides):
+    tmp = Conv2D(filters, kernel_size, strides, 'same')(model)
+    tmp = BatchNormalization()(tmp)
+    tmp = LeakyReLU(alpha=0.2)(tmp)
+
+    return tmp
