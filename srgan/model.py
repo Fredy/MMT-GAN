@@ -29,7 +29,7 @@ def get_generator(input_shape):
     net = Add()([net, pre_res_block])
 
     # Upscale
-    # TODO: add activation = relu
+    # TODO: add activation = relu ?
     net = Conv2DTranspose(256, 3, 1, 'same')(net)
     net = Conv2DTranspose(256, 3, 1, 'same')(net)
 
