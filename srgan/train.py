@@ -20,13 +20,13 @@ def get_optimizer():
 
 
 # Combined network
-def get_gan_network(discriminator, generator, shape, optimizer, vgg_loss):
+def get_gan_network(discriminator, generator, shape, optimizer, vgg_loss=None):
     discriminator.trainable = False
     gan_input = Input(shape=shape)
     x = generator(gan_input)
     gan_output = discriminator(x)
     gan = Model(inputs=gan_input, outputs=[x, gan_output])
-    gan.compile(loss=[vgg_loss, "binary_crossentropy"],
+    gan.compile(loss=['mean_squared_error', 'binary_crossentropy'],
                 loss_weights=[1., 1e-3],
                 optimizer=optimizer)
 
@@ -40,19 +40,17 @@ def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
 
     image_count = img_loader.imgs_count
 
-    loss = VGGLoss(image_shape)
-
     batch_count = image_count // batch_size
 
     generator = get_generator(image_shape)
     discriminator = get_discriminator(image_shape)
 
     optimizer = get_optimizer()
-    generator.compile(loss=loss.vgg_loss, optimizer=optimizer)
+    generator.compile(loss='mean_squared_error', optimizer=optimizer)
     discriminator.compile(loss="binary_crossentropy", optimizer=optimizer)
 
     gan = get_gan_network(
-        discriminator, generator, image_shape, optimizer, loss.vgg_loss)
+        discriminator, generator, image_shape, optimizer)
 
     loss_file = open(path.join(model_save_dir, 'losses.txt'), 'w+')
     loss_file.close()
