@@ -58,7 +58,7 @@ def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
     loss_file.close()
 
     for e in range(1, epochs + 1):
-        logging.info('-' * 15, f'Epoch {e}', '-' * 15)
+        logging.info(f'======== Epoch {e} =======')
         for _ in tqdm(range(batch_count)):
             rand_ints = np.random.randint(0, image_count, batch_size)
 
