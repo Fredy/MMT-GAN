@@ -1,4 +1,5 @@
-from os import path
+from os import listdir, path
+from typing import List
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -57,3 +58,13 @@ def plot_example_images(
     plt.savefig(
         path.join(output_dir, f'generated_image_{epoch}.svg'),
         bbox_inches='tight', pad_inches=0, )
+
+
+def get_files_names_from_dir(directory: str, ext: str) -> List[str]:
+    """Return list of file's names with extension `ext` from `directory`."""
+    files_names = [
+        file_name
+        for file_name in listdir(directory) if file_name.endswith(ext)
+    ]
+    files_names.sort()
+    return files_names

@@ -1,12 +1,11 @@
 from collections.abc import Iterable
 from functools import lru_cache
-from os import listdir, path
-from typing import List
+from os import path
 
 import numpy as np
 from PIL import Image
 
-from common.utils import normalize
+from common.utils import get_files_names_from_dir, normalize
 
 TRAIN_DIR = 'train'
 LABEL_DIR = 'label'
@@ -47,23 +46,13 @@ class DataLoader:
     @lru_cache(2048)
     def _get_train_img(self, idx):
         full_path = path.join(self.train_dir, self.files_names[idx])
-        return normalize(np.array(Image.open(full_path))[:,85:,:])
+        return normalize(np.array(Image.open(full_path))[:, 85:, :])
 
     @lru_cache(2048)
     def _get_label_img(self, idx):
         full_path = path.join(self.label_dir, self.files_names[idx])
-        return normalize(np.array(Image.open(full_path))[:,85:,:])
+        return normalize(np.array(Image.open(full_path))[:, 85:, :])
 
     @property
     def imgs_count(self):
         return len(self.files_names)
-
-
-def get_files_names_from_dir(directory: str, ext: str) -> List[str]:
-    """Return list of file's names with extension `ext` from `directory`."""
-    files_names = [
-        file_name
-        for file_name in listdir(directory) if file_name.endswith(ext)
-    ]
-    files_names.sort()
-    return files_names
