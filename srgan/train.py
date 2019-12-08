@@ -1,4 +1,5 @@
 from os import path
+import logging
 
 import numpy as np
 from tensorflow.keras.layers import Input
@@ -14,6 +15,7 @@ from srgan.vgg19 import VGGLoss
 np.random.seed(123)
 image_shape = (60, 95, 3)
 
+logging.basicConfig(level=logging.INFO)
 
 def get_optimizer():
     return Adam(lr=1E-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08)
@@ -56,7 +58,7 @@ def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
     loss_file.close()
 
     for e in range(1, epochs + 1):
-        print('-' * 15, f'Epoch {e}', '-' * 15)
+        logging.info('-' * 15, f'Epoch {e}', '-' * 15)
         for _ in tqdm(range(batch_count)):
             rand_ints = np.random.randint(0, image_count, batch_size)
 
@@ -86,8 +88,8 @@ def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
             gan_loss = gan.train_on_batch(image_batch_train,
                                           [image_batch_label, gan_target])
 
-        print(f'discriminator_loss : {discriminator_loss}')
-        print(f'gan_loss : {gan_loss}')
+        logging.info(f'discriminator_loss : {discriminator_loss}')
+        logging.info(f'gan_loss : {gan_loss}')
         gan_loss = str(gan_loss)
 
         with open(model_save_dir + 'losses.txt', 'a') as loss_file:
