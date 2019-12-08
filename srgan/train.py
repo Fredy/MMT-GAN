@@ -6,6 +6,7 @@ import numpy as np
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.optimizers import Adam
+from tensorflow_core.python.framework.ops import disable_eager_execution
 from tqdm import tqdm
 
 from common import utils
@@ -60,6 +61,7 @@ def get_gan_network(discriminator, generator, shape, optimizer, vgg_loss=None):
 
 
 def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
+    disable_eager_execution()
     img_loader = DataLoader(input_dir, 'jpg')
     train_imgs = img_loader.train_imgs
     label_imgs = img_loader.label_imgs
@@ -68,21 +70,24 @@ def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
 
     batch_count = image_count // batch_size
 
-    optimizer = get_optimizer()
 
     saved_epoch = get_last_saved_epoch(model_save_dir)
 
     if saved_epoch:
+        first_epoch = saved_epoch + 1
+
         generator = load_model(
             path.join(model_save_dir, f'gen_model_{saved_epoch}.h5'))
 
         discriminator = load_model(
             path.join(model_save_dir, f'dis_model_{saved_epoch}.h5'))
-        first_epoch = saved_epoch + 1
+        optimizer = generator.optimizer
     else:
         first_epoch = 1
+
         generator = get_generator(image_shape)
         discriminator = get_discriminator(image_shape)
+        optimizer = get_optimizer()
         generator.compile(loss='mean_squared_error', optimizer=optimizer)
         discriminator.compile(loss="binary_crossentropy", optimizer=optimizer)
 
