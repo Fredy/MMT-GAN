@@ -74,10 +74,10 @@ def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
 
     if saved_epoch:
         generator = load_model(
-            path.join(model_save_dir, f'gen_model{saved_epoch}.h5'))
+            path.join(model_save_dir, f'gen_model_{saved_epoch}.h5'))
 
         discriminator = load_model(
-            path.join(model_save_dir, f'dis_model{saved_epoch}.h5'))
+            path.join(model_save_dir, f'dis_model_{saved_epoch}.h5'))
         first_epoch = saved_epoch + 1
     else:
         first_epoch = 1
