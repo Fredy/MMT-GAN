@@ -12,7 +12,7 @@ from srgan.model import get_discriminator, get_generator
 from srgan.vgg19 import VGGLoss
 
 np.random.seed(123)
-image_shape = (60, 180, 3)
+image_shape = (60, 95, 3)
 
 
 def get_optimizer():

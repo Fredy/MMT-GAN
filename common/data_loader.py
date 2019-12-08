@@ -47,12 +47,12 @@ class DataLoader:
     @lru_cache(2048)
     def _get_train_img(self, idx):
         full_path = path.join(self.train_dir, self.files_names[idx])
-        return normalize(np.array(Image.open(full_path)))
+        return normalize(np.array(Image.open(full_path))[:,85:,:])
 
     @lru_cache(2048)
     def _get_label_img(self, idx):
         full_path = path.join(self.label_dir, self.files_names[idx])
-        return normalize(np.array(Image.open(full_path)))
+        return normalize(np.array(Image.open(full_path))[:,85:,:])
 
     @property
     def imgs_count(self):
