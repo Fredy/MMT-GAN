@@ -1,7 +1,11 @@
 import argparse
 import os
 
+import tensorflow as tf
+
 from srgan.train import train
+
+tf.compat.v1.disable_eager_execution()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

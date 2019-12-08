@@ -6,7 +6,6 @@ import numpy as np
 from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model, load_model
 from tensorflow.keras.optimizers import Adam
-from tensorflow_core.python.framework.ops import disable_eager_execution
 from tqdm import tqdm
 
 from common import utils
@@ -61,7 +60,6 @@ def get_gan_network(discriminator, generator, shape, optimizer, vgg_loss=None):
 
 
 def train(epochs, batch_size, input_dir, output_dir, model_save_dir):
-    disable_eager_execution()
     img_loader = DataLoader(input_dir, 'jpg')
     train_imgs = img_loader.train_imgs
     label_imgs = img_loader.label_imgs
