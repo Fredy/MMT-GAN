@@ -142,7 +142,7 @@ def train(
             rand_ints = np.random.randint(0, image_count, batch_size)
             image_batch_train = train_imgs[rand_ints]
             image_batch_label = label_imgs[rand_ints]
-            chars_batch = plate_chars[rand_ints]
+            chars_batch = plate_chars[rand_ints].reshape(4 * batch_size, 35)
 
             gan_target = chars_batch + tmp_one_hot_label
             discriminator.trainable = False
