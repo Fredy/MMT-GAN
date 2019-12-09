@@ -1,64 +1,41 @@
 import argparse
+from os import makedirs, path
 
-import Utils
+import numpy as np
+from PIL import Image
 from tensorflow.keras.models import load_model
+from tqdm import tqdm
 
-image_shape = (96, 96, 3)
-
-
-def test_model(input_hig_res, model, number_of_images, output_dir):
-    x_test_lr, x_test_hr = Utils.load_test_data_for_model(input_hig_res, 'jpg',
-                                                          number_of_images)
-    Utils.plot_test_generated_images_for_model(output_dir, model, x_test_hr,
-                                               x_test_lr)
-
-
-def test_model_for_lr_images(input_low_res, model, number_of_images,
-                             output_dir):
-    x_test_lr = Utils.load_test_data(input_low_res, 'jpg', number_of_images)
-    Utils.plot_test_generated_images(output_dir, model, x_test_lr)
-
+from common.data_loader import DataLoader
+from common.utils import denormalize
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('-ihr', '--input_hig_res', action='store',
-                        dest='input_hig_res', default='./data/',
-                        help='Path for input images Hig resolution')
-
-    parser.add_argument('-ilr', '--input_low_res', action='store',
-                        dest='input_low_res', default='./data_lr/',
-                        help='Path for input images Low resolution')
+    parser.add_argument('-i', '--input_dir', action='store',
+                        dest='input_dir', default='./data',
+                        help='Path for input test images.')
 
     parser.add_argument('-o', '--output_dir', action='store', dest='output_dir',
-                        default='./output/',
-                        help='Path for Output images')
+                        default='./output',
+                        help='Output directory for generated images.')
 
-    parser.add_argument('-m', '--model_dir', action='store', dest='model_dir',
-                        default='./model/gen_model3000.h5',
-                        help='Path for model')
+    parser.add_argument('-m', '--model_path', action='store', dest='model_path',
+                        help='Path for model h5 data.')
 
-    parser.add_argument('-n', '--number_of_images', action='store',
-                        dest='number_of_images', default=25,
-                        help='Number of Images', type=int)
-
-    parser.add_argument('-t', '--test_type', action='store', dest='test_type',
-                        default='test_model',
-                        help='Option to test model output or to test low resolution image')
+    left = np.array(Image.open('test_img.jpg'))[:,:85]
 
     values = parser.parse_args()
 
-    model = load_model(values.model_dir,
-                       custom_objects={'vgg_loss': loss.vgg_loss})
+    output_dir = values.output_dir
+    makedirs(output_dir, exist_ok=True)
 
-    if values.test_type == 'test_model':
-        test_model(values.input_hig_res, model, values.number_of_images,
-                   values.output_dir)
+    loader = DataLoader(values.input_dir, 'jpg', test=False)
+    generator = load_model(values.model_path)
 
-    elif values.test_type == 'test_lr_images':
-        test_model_for_lr_images(values.input_low_res, model,
-                                 values.number_of_images, values.output_dir)
-
-    else:
-        print("No such option")
+    for idx, name in tqdm(enumerate(loader.files_names)):
+        out = generator.predict(np.array([loader.train_imgs[idx]]))
+        out = denormalize(out[0])
+        out = np.concatenate([left, out], 1)
+        Image.fromarray(out).save(path.join(output_dir, name))

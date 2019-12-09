@@ -7,7 +7,7 @@ from mmtgan.train import train as mmtgan_train
 from mtgan.train import train as mtgan_train
 from srgan.train import train as srgan_train
 
-# tf.compat.v1.disable_eager_execution()
+tf.compat.v1.disable_eager_execution()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
