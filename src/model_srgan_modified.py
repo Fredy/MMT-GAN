@@ -1,15 +1,9 @@
 from tensorflow.keras.layers import (
-    Input,
-    Conv2D,
-    ReLU,
-    BatchNormalization,
-    Dense,
-    Add,
-    Conv2DTranspose,
-    LeakyReLU,
-    Flatten,
+    Add, BatchNormalization, Conv2D, Conv2DTranspose, Dense, Flatten, Input,
+    LeakyReLU, ReLU,
 )
 from tensorflow.keras.models import Model
+
 
 # Note: using ReLU instead of PReLU for convenience
 def get_generator(input_shape):
@@ -46,8 +40,8 @@ def get_generator(input_shape):
 
 def _discriminator_block(model, filters, kernel_size, strides):
     tmp = Conv2D(filters, kernel_size, strides, 'same')(model)
-    tmp = BatchNormalization()(tmp)
     tmp = LeakyReLU(alpha=0.2)(tmp)
+    tmp = BatchNormalization()(tmp)
 
     return tmp
 
