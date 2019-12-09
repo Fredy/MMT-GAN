@@ -8,6 +8,7 @@ from PIL import Image
 from common.utils import get_files_names_from_dir, normalize
 
 TRAIN_DIR = 'train'
+TEST_DIR = 'test'
 LABEL_DIR = 'label'
 
 
@@ -25,7 +26,7 @@ class DataGetter:
 class DataLoader:
     """Load training data without consuming much RAM."""
 
-    def __init__(self, directory, ext):
+    def __init__(self, directory, ext, test=False):
         """
         The specified directory should contains two folders: `train` and `label`
         each one with the same quantity of images. Each image in the `train`
@@ -35,8 +36,10 @@ class DataLoader:
         :param ext: Image extension.
         :return: Train and label images.
         """
-
-        self.train_dir = path.join(directory, TRAIN_DIR)
+        if not test:
+            self.train_dir = path.join(directory, TRAIN_DIR)
+        else:
+            self.train_dir = path.join(directory, TEST_DIR)
         self.label_dir = path.join(directory, LABEL_DIR)
         self.files_names = get_files_names_from_dir(self.train_dir, ext)
 
